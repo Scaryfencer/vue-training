@@ -1,0 +1,8 @@
+v-bind shorthand: Can pass an object to :class (short for v-bind:class) to dynamically toggle classes.
+
+v-on shorthand: 
+ex. <a v-on:click="doSomething"> ... </a>
+
+Can use truthiness tests to determine if the class is active:
+<div :class="{ active: isActive }"></div>
+
