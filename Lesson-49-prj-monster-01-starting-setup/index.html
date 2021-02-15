@@ -28,17 +28,28 @@
         <div class="healthbar__value" :style="playerHealthBar"></div>
       </div>
     </section>
-    <section id="controls">
+    <section v-if="!winner" id="controls">
       <button @click="attackMonster">ATTACK</button>
       <button @click=specialAttack :disabled="blockSpecial">SPECIAL ATTACK</button>
       <button @click="heal" :disabled="blockHeal">HEAL</button>
-      <button>SURRENDER</button>
+      <button @click="surrender">SURRENDER</button>
+    </section>
+  <section v-else class="container">
+      <h2>Game Over!</h2>
+      <h3 v-if="winner == 'monster'">You Loose!</h3>
+      <h3 v-else-if="winner == 'player'">You Win!</h3>
+      <h3 v-else>It's a Tie! ¯\_(ツ)_/¯</h3>
+      <button @click="startOver">Start Over!!</button>
     </section>
     <section id="log" class="container">
       <h2>Battle Log</h2>
       <ul>
         <li v-for="log in combatLog">
-          <span :class="['log--' + log.source]">{{log.source}} </span> {{log.type}} <span :class="['log--' + log.dest]">{{log.dest}} </span> for <span :class="['log--' + log.type]">{{log.amount}}</span>
+          <span :class="{'log--player': log.source == 'player', 'log--monster':log.source == 'monster'}">{{log.source == 'player' ? 'Player' : 'Monster'}}</span>
+          <span v-if="log.event =='heal'"> heals himself for <span class="log--heal">{{log.amount}}</span></span>
+          <span v-else-if="log.event == 'attack'"> deals <span class="log--damage">{{log.amount}}</span> damage</span>
+          <span v-else-if="log.event == 'special'"> does special attack for <span class="log--damage">{{log.amount}}</span> damage</span>
+
         </li>
       </ul>
     </section>

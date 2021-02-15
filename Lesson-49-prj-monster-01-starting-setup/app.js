@@ -9,7 +9,8 @@ const app = Vue.createApp({
             pHealth: 100,
             lastUsedSpecial: 0,
             lastUsedHeal: 0,
-            combatLog: []
+            combatLog: [],
+            winner: ""
         }
     },
     computed: {
@@ -32,17 +33,46 @@ const app = Vue.createApp({
             return (this.lastUsedHeal < 2);
         }
     },
+    watch: {
+        pHealth(value) {
+            if (value <= 0 && this.mHealth <= 0) {
+                this.winner = 'draw';
+            } else if (value <= 0) {
+                this.winner = 'monster'
+            }
+        },
+        mHealth(value) {
+            if (value <= 0 && this.pHealth <= 0) {
+                this.winner = 'draw';
+            } else if (value <= 0) {
+                this.winner = 'player';
+            }
+        }
+    },
     methods: {
+        addLog(source, event, value) {
+            this.combatLog.unshift({
+                source: source,
+                event: event,
+                amount: value
+            })
+        },
+        startOver() {
+            this.mHealth = this.pHealth = 100;
+            this.lastUsedSpecial = this.lastUsedHeal = 0;
+            this.combatLog = [];
+            this.winner = "";
+        },
         attackMonster() {
             const damage = calcDamage(5, 10);
-            this.mHealth -= damage; 
-            this.combatLog.push({type: 'damage', dest: 'monster', source: 'player', amount: damage});
+            this.mHealth -= damage;
+            this.addLog('player', 'attack', damage);
             this.attackPlayer();
         },
         attackPlayer() {
             const damage = calcDamage(8, 12);
             this.pHealth -= damage;
-            this.combatLog.push({type: 'damage', dest: 'player', source: 'monster', amount: damage});
+            this.addLog('monster', 'attack', damage);
             this.lastUsedSpecial++;
             this.lastUsedHeal++;
         },
@@ -50,7 +80,7 @@ const app = Vue.createApp({
             if (this.lastUsedHeal >= 2) {
                 const healing = calcDamage(9, 17);
                 this.pHealth += healing
-                this.combatLog.push({type: 'heal', dest: 'player', source: 'player', amount: healing});
+                this.addLog('player', 'heal', healing);
                 this.attackPlayer();
                 this.lastUsedHeal = 0
             }
@@ -58,9 +88,13 @@ const app = Vue.createApp({
         specialAttack() {
             if (this.lastUsedSpecial >= 3) {
                 this.mHealth -= 20;
+                this.addLog('player', 'special', 20);
                 this.attackPlayer();
                 this.lastUsedSpecial = 0;
             }
+        },
+        surrender() {
+            this.winner = 'monster';
         }
     },
 });
